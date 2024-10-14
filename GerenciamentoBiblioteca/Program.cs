@@ -148,31 +148,21 @@ class Program
                                             Console.Write("Insira o nome do livro: ");
                                             string livroAAlugar = Console.ReadLine();
                                             bool contemLivro = false;
-                                            for (int i = 0; i < biblioteca.Count; i++)
+                                            foreach (var livro in biblioteca)
                                             {
-                                                foreach (var livro in biblioteca)
+                                                if (livro.Titulo == livroAAlugar)
                                                 {
-                                                    if (livro.Titulo == livroAAlugar)
-                                                    {
-                                                        contemLivro = true;
-                                                        livrosAlugados.Add(new Livro(livro.Titulo, livro.Autor, livro.Genero, livro.Quantidade));
-                                                        biblioteca.RemoveAt(i); //-- livro.Quantidade instead                                                      
-                                                        break;
-                                                    }
-                                                    else
-                                                    {
-                                                        contemLivro = false;
-                                                    }
+                                                    contemLivro = true;
+                                                    livro.Quantidade--;
+                                                    Console.WriteLine("Livro emprestado com sucesso!");
+                                                    break;
                                                 }
                                             }
-                                            if (contemLivro)
-                                            {
-                                                Console.WriteLine("Livro emprestado com sucesso!");
-                                            }
-                                            else
+                                            if (!contemLivro)
                                             {
                                                 Console.WriteLine("Livro não encontrado.");
                                             }
+                                            break;
                                             break;
 
                                         case 3:
