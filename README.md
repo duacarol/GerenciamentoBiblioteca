@@ -13,11 +13,13 @@ Projeto desenvolvido durante as aulas do curso técnico em Informática para Int
 ### Funcionalidades básicas
 - [x] **Cadastro de usuário**: Permite o cadastro de novos usuários com nome de usuário e senha únicos.  
 - [x] **Login**: Valida as credenciais de usuários comuns (U) e administradores (A) para acesso ao sistema.
+![Funcionalidade de cadastro e login de usuário sendo executada na aplicação.](img/cadastro-login-usuario.gif)
 - [x] **Consulta ao catálogo (A/U)**: Usuários e administradores podem consultar os livros disponíveis, com título, autor, gênero e quantidade.
 - [x] **Cadastro de novos livros (A)**: Administradores podem cadastrar livros novos, incluindo título, autor, gênero e quantidade.
 ![Funcionalidade de cadastro de novos livros sendo executada na aplicação.](img/cadastrar-livro.gif)
 - [x] **Aluguel de livros (U)**: Usuários podem alugar livros, respeitando o limite de 3 livros alugados por usuário.
 - [x] **Devolução de livros (U)**: Usuários podem devolver livros alugados, atualizando o estoque e a contagem de livros alugados.
+![Funcionalidade de aluguel e devolução de livros sendo executada na aplicação.](img/alugar-devolver-livro.gif)
 
 ### Detalhes técnicos
 -  **Estruturas de decisão**: O sistema utiliza estruturas de decisão para:
