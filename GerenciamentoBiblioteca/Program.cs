@@ -24,13 +24,9 @@
             switch (escolhaUsuario)
             {
                 case 1:
-                    Console.Clear();
-                    EscreverTitulo("Sistema de Gerenciamento de Biblioteca");
                     FazerLogin(usuarios, biblioteca);
                     break;
                 case 2:
-                    Console.Clear();
-                    EscreverTitulo("Sistema de Gerenciamento de Biblioteca");
                     CadastrarUsuario(usuarios);
                     break;
                 case 0:
@@ -46,11 +42,12 @@
     {
         Console.WriteLine("1- Fazer Login");
         Console.WriteLine("2- Cadastrar Novo Usuário");
-        Console.WriteLine("0- Sair");
+        Console.WriteLine("0- Sair da Aplicação");
     }
 
     static void FazerLogin(List<Usuario> usuarios, List<Livro> biblioteca)
     {
+        Console.Clear();
         EscreverTitulo("Fazer Login");
         Console.Write("Usuário: ");
         string nomeUsuario = Console.ReadLine();
@@ -61,7 +58,8 @@
 
         if (usuarioLogado != null)
         {
-            Console.WriteLine($"Login bem-sucedido. Bem-vindo(a), {usuarioLogado.NomeUsuario}!");
+            ColorirLinha($"Login bem-sucedido. Bem-vindo(a), {usuarioLogado.NomeUsuario}!", ConsoleColor.Green);
+            PausarConsole();
             if (usuarioLogado.EhAdmin)
             {
                 MenuAdmin(usuarioLogado, biblioteca);
@@ -74,6 +72,7 @@
         else
         {
             ColorirLinha("Nome de usuário ou senha inválido(s).", ConsoleColor.Red);
+            PausarConsole();
         }
     }
 
@@ -85,7 +84,7 @@
             EscreverTitulo("Sistema de Gerenciamento de Biblioteca");
             Console.WriteLine("1- Consultar Catálogo");
             Console.WriteLine("2- Cadastrar Livro");
-            Console.WriteLine("0- Sair");
+            Console.WriteLine("0- Sair da Conta");
 
             int escolha = LerOpcao(0, 2);
             switch (escolha)
@@ -111,7 +110,7 @@
             Console.WriteLine("1- Consultar Catálogo");
             Console.WriteLine("2- Alugar Livro");
             Console.WriteLine("3- Devolver Livro");
-            Console.WriteLine("0- Sair");
+            Console.WriteLine("0- Sair da Conta");
 
             int escolha = LerOpcao(0, 3);
             switch (escolha)
@@ -133,27 +132,36 @@
 
     static void ConsultarCatalogo(List<Livro> biblioteca)
     {
+        Console.Clear();
         EscreverTitulo("Consultar Catálogo");
         foreach (var livro in biblioteca)
         {
-            if (livro.Quantidade > 0)
-            {
-                Console.WriteLine($"Título: {livro.Titulo}");
-                Console.WriteLine($"Autor: {livro.Autor}");
-                Console.WriteLine($"Gênero: {livro.Genero}");
-                Console.WriteLine($"Quantidade: {livro.Quantidade}\n");
-            }
+            Console.WriteLine($"Título: {livro.Titulo}");
+            Console.WriteLine($"Autor: {livro.Autor}");
+            Console.WriteLine($"Gênero: {livro.Genero}");
+            Console.WriteLine($"Quantidade: {livro.Quantidade} {(livro.Quantidade == 0 ? "(Indisponível)" : "")}\n");
         }
-        Console.Write("Pressione qualquer tecla para continuar...");
-        Console.ReadKey();
+        PausarConsole();
     }
 
     static void CadastrarLivro(List<Livro> biblioteca)
     {
+        Console.Clear();
         EscreverTitulo("Cadastrar Livro");
+        string titulo;
 
-        Console.Write("Insira o título do livro: ");
-        string titulo = Console.ReadLine();
+        do
+        {
+            Console.Write("Insira o título do livro: ");
+            titulo = Console.ReadLine();
+        } while (string.IsNullOrWhiteSpace(titulo));
+
+        if (biblioteca.Exists(l => l.Titulo.Equals(titulo, StringComparison.OrdinalIgnoreCase)))
+        {
+            ColorirLinha("Este livro já está cadastrado.", ConsoleColor.Red);
+            PausarConsole();
+            return;
+        }
 
         Console.Write("Insira o autor do livro: ");
         string autor = Console.ReadLine();
@@ -166,63 +174,60 @@
 
         biblioteca.Add(new Livro(titulo, autor, genero, quantidade));
         ColorirLinha("Livro cadastrado com sucesso!", ConsoleColor.Green);
+        PausarConsole();
     }
 
     static void AlugarLivro(Usuario usuarioLogado, List<Livro> biblioteca)
     {
-        if (usuarioLogado.QntLivrosAlugados < 3)
+        Console.Clear();
+        EscreverTitulo("Alugar Livro");
+        if (usuarioLogado.QntLivrosAlugados >= 3)
         {
-            EscreverTitulo("Alugar Livro");
-            Console.Write("Insira o nome do livro: ");
-            string livroAAlugar = Console.ReadLine();
-            foreach (var livro in biblioteca)
-            {
-                if (livro.Titulo.Equals(livroAAlugar, StringComparison.OrdinalIgnoreCase) && livro.Quantidade > 0)
-                {
-                    livro.Quantidade--;
-                    usuarioLogado.QntLivrosAlugados++;
-                    livro.UsuariosAlugando.Add(usuarioLogado.NomeUsuario);
-                    Console.WriteLine("Livro alugado com sucesso!");
-                    return;
-                }
-            }
-            ColorirLinha("Livro não encontrado ou indisponível no momento.", ConsoleColor.Red);
+            ColorirLinha("Você atingiu o limite de 3 livros alugados. Devolva algum livro para alugar outro.", ConsoleColor.Red);
+            PausarConsole();
+            return;
+        }
+
+        Console.Write("Insira o nome do livro: ");
+        string livroAAlugar = Console.ReadLine();
+
+        var livro = biblioteca.Find(l => l.Titulo.Equals(livroAAlugar, StringComparison.OrdinalIgnoreCase));
+        if (livro != null && livro.Quantidade > 0)
+        {
+            livro.Quantidade--;
+            usuarioLogado.QntLivrosAlugados++;
+            livro.UsuariosAlugando.Add(usuarioLogado.NomeUsuario);
+            ColorirLinha("Livro alugado com sucesso!", ConsoleColor.Green);
+            PausarConsole();
         }
         else
         {
-            ColorirLinha("Você não pode alugar mais livros no momento, pois já atingiu o limite de 3. Devolva algum livro e tente novamente.", ConsoleColor.Red);
+            ColorirLinha("Livro não encontrado ou indisponível no momento.", ConsoleColor.Red);
+            PausarConsole();
         }
-        Console.Write("Pressione qualquer tecla para continuar...");
-        Console.ReadKey();
     }
 
     static void DevolverLivro(Usuario usuarioLogado, List<Livro> biblioteca)
     {
+        Console.Clear();
         EscreverTitulo("Devolver Livro");
         Console.Write("Insira o nome do livro: ");
         string livroADevolver = Console.ReadLine();
-        foreach (var livro in biblioteca)
+
+        var livro = biblioteca.Find(l => l.Titulo.Equals(livroADevolver, StringComparison.OrdinalIgnoreCase));
+        if (livro != null && livro.UsuariosAlugando.Contains(usuarioLogado.NomeUsuario))
         {
-            if (livro.Titulo.Equals(livroADevolver, StringComparison.OrdinalIgnoreCase))
-            {
-                if (livro.UsuariosAlugando.Contains(usuarioLogado.NomeUsuario))
-                {
-                    livro.Quantidade++;
-                    usuarioLogado.QntLivrosAlugados--;
-                    livro.UsuariosAlugando.Remove(usuarioLogado.NomeUsuario);
-                    ColorirLinha("Livro devolvido com sucesso!", ConsoleColor.Green);
-                    return;
-                }
-                else
-                {
-                    ColorirLinha("Você não alugou este livro.", ConsoleColor.Red);
-                    return;
-                }
-            }
+            livro.Quantidade++;
+            usuarioLogado.QntLivrosAlugados--;
+            livro.UsuariosAlugando.Remove(usuarioLogado.NomeUsuario);
+            ColorirLinha("Livro devolvido com sucesso!", ConsoleColor.Green);
+            PausarConsole();
         }
-        ColorirLinha("Livro não encontrado ou você não alugou este livro.", ConsoleColor.Red);
-        Console.Write("Pressione qualquer tecla para continuar...");
-        Console.ReadKey();
+        else
+        {
+            ColorirLinha("Você não alugou este livro ou digitou o nome de forma incorreta.", ConsoleColor.Red);
+            PausarConsole();
+        }
     }
 
     static int LerOpcao(int min, int max)
@@ -252,22 +257,20 @@
 
     static Usuario ValidarLogin(List<Usuario> usuarios, string nomeUsuario, string senha)
     {
-        foreach (var usuario in usuarios)
-        {
-            if (usuario.NomeUsuario == nomeUsuario && usuario.Senha == senha)
-                return usuario;
-        }
-        return null;
+        return usuarios.Find(u => u.NomeUsuario.Equals(nomeUsuario, StringComparison.OrdinalIgnoreCase) && u.Senha == senha);
     }
 
     static void CadastrarUsuario(List<Usuario> usuarios)
     {
+        Console.Clear();
+        EscreverTitulo("Cadastrar Novo Usuário");
         Console.Write("Usuário: ");
         string nomeUsuario = Console.ReadLine();
 
-        if (usuarios.Exists(u => u.NomeUsuario == nomeUsuario))
+        if (usuarios.Exists(u => u.NomeUsuario.Equals(nomeUsuario, StringComparison.OrdinalIgnoreCase)))
         {
             ColorirLinha("Nome de usuário já está em uso. Tente outro.", ConsoleColor.Red);
+            PausarConsole();
             return;
         }
 
@@ -276,6 +279,7 @@
 
         usuarios.Add(new Usuario(nomeUsuario, senha, false, 0));
         ColorirLinha("Usuário cadastrado com sucesso!", ConsoleColor.Green);
+        PausarConsole();
     }
 
     static void EscreverTitulo(string titulo)
@@ -292,6 +296,12 @@
         Console.ForegroundColor = cor;
         Console.WriteLine(texto);
         Console.ResetColor();
+    }
+
+    static void PausarConsole()
+    {
+        Console.Write("Pressione qualquer tecla para continuar...");
+        Console.ReadKey();
     }
 }
 
@@ -313,11 +323,11 @@ public class Usuario
 
 public class Livro
 {
-    public string Titulo { get; set; }
-    public string Autor { get; set; }
-    public string Genero { get; set; }
+    public string Titulo { get; }
+    public string Autor { get; }
+    public string Genero { get; }
     public int Quantidade { get; set; }
-    public List<string> UsuariosAlugando { get; set; }
+    public List<string> UsuariosAlugando { get; }
 
     public Livro(string titulo, string autor, string genero, int quantidade)
     {
